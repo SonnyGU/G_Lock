@@ -78,7 +78,7 @@ web_input.focus()
 
 email_input = Entry()
 email_input.grid(row=2, column=1, columnspan=2, sticky="EW")
-email_input.insert(0, "Gulysse@live.com")
+email_input.insert(0, "1234@gmail.com")
 
 pw_input = Entry()
 pw_input.grid(row=3, column=1, sticky="EW")
