@@ -51,7 +51,7 @@ def hit_add():
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
-window.title("Password Manager")
+window.title("G-Lock")
 window.config(pady=50, padx=50)
 
 # canvas
