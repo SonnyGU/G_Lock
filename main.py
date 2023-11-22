@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 import random
 import pyperclip
+import json
 
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
@@ -35,18 +36,59 @@ def hit_add():
     user = email_input.get()
     pw = pw_input.get()
     length = min(len(web), len(user), len(pw))
+    my_data = {
+        web: {
+            "email": user,
+            "password": pw,
+        }
+    }
     if length == 0:
         messagebox.showerror("Error", "Valid input required for all fields")
     else:
-        checking = messagebox.askyesno(title=web, message=f"These are the details entered: \n"
-                                                          f"Email\\Username: {user}"
-                                                          f"\nPassword: {pw}"
-                                                          f"\nDo you want to save?")
-        if checking:
-            with open("myFile.txt", "a") as file:
-                file.write(f"{web} | {user} | {pw}\n")
-            web_input.delete(0, END)
-            pw_input.delete(0, END)
+        try:
+            with open("myFile.json", "r") as file:
+                # reading old data and checking if it's empty
+                file_content = file.read()
+                if file_content:
+                    old_data = json.loads(file_content)
+                else:
+                    old_data = {}
+
+        except FileNotFoundError:
+            old_data = {}
+
+        old_data.update(my_data)
+
+        with open("myFile.json", "w") as file:
+            json.dump(old_data, file, indent=5)
+
+        web_input.delete(0, END)
+        pw_input.delete(0, END)
+
+
+# ---------------------------- SEARCH ------------------------------- #
+def searching():
+    web = web_input.get()
+    if not web:
+        messagebox.showerror("Error", "Please enter  a website to search")
+        return
+
+    try:
+        with open("myFile.json", "r") as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        messagebox.showerror("Error", "Data file not found.")
+        return
+    except json.JSONDecodeError:
+        messagebox.showerror("Error", "Data file is corrupt or empty.")
+        return
+
+    if web in data:
+        user_info = data[web]
+        message = f"Website: {web}\nEmail/Username: {user_info['email']}\nPassword: {user_info['password']}"
+        messagebox.showinfo("Found Credentials", message)
+    else:
+        messagebox.showinfo("Not Found", f"No details found for the website: {web}")
 
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -73,7 +115,7 @@ pw_label.grid(row=3, column=0)
 
 # input fields
 web_input = Entry()
-web_input.grid(row=1, column=1, columnspan=2, sticky="EW")
+web_input.grid(row=1, column=1, sticky="EW")
 web_input.focus()
 
 email_input = Entry()
@@ -90,5 +132,8 @@ add_button.grid(row=4, column=1, columnspan=2, sticky="EW")
 
 gen_button = Button(text="Generate Password", command=rando_pw)
 gen_button.grid(row=3, column=2, sticky="EW")
+
+search_button = Button(text="Search", command=searching )
+search_button.grid(row=1, column=2, sticky="EW")
 
 window.mainloop()
